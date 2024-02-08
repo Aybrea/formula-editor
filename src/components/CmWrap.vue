@@ -262,9 +262,19 @@ const iwEditorLinter = linter((view) => {
     // Errors in syntax tree parsing may accidentally trigger formula parameter number check errors
     const verifiedNode: [number, number][] = []
     formulaResult.materials = []
+    const tokens = []
     syntaxTree(view.state)
       .topNode.cursor()
       .iterate((node: any) => {
+        const name = node.node.name
+        const from = node.node.from
+        const to = node.node.to
+        tokens.push({
+          name,
+          from,
+          to,
+          doc: view.state.doc.sliceString(from, to),
+        })
         diagnosticFormula(
           node.node,
           view.state,
@@ -279,6 +289,7 @@ const iwEditorLinter = linter((view) => {
           },
         )
       })
+    console.log(tokens)
   }
 
   document.querySelectorAll('.iw-cm-wrap__key-word').forEach((element) => {
