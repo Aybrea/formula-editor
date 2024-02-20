@@ -108,7 +108,7 @@ const materials: iwInterface.Namespace[] = reactive([
           kind: iwInterface.VarKind.NUMBER,
         },
         body: `return Date.now()`,
-        cates: ['COMMON', 'TIME'],
+        cates: ['常用', '时间'],
       },
     ],
   },

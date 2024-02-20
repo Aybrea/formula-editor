@@ -39,6 +39,8 @@ interface LabelNameConf {
 
 if (props.addDefaultFunLib) {
   const customFunNs = props.materials.find(ns => ns.name === DEFAULT_FUN_LIB.name)
+  console.log(customFunNs)
+
   if (customFunNs) {
     const customFuns = customFunNs.items as FunInfo[]
     const defaultFuns = DEFAULT_FUN_LIB.items as FunInfo[]
@@ -177,6 +179,8 @@ function searchMaterials(isVar: boolean, filterName: string) {
   else
     materialFuns.value.splice(0, materialFuns.value.length)
 
+  console.log(findMaterials(isVar, filterName))
+
   findMaterials(isVar, filterName).forEach((material) => {
     if (isVar)
       materialVars.value.push(material)
@@ -184,6 +188,7 @@ function searchMaterials(isVar: boolean, filterName: string) {
     else
       materialFuns.value.push(material)
   })
+  console.log(materialFuns)
 }
 
 onMounted(() => {
@@ -223,8 +228,13 @@ function generateMaterialTree(materialItems: MaterialItemTree[], nsName: string,
   let html = ''
   for (const item of materialItems) {
     if (item.children) {
+      const isOpen = (['fun', 'api'].includes(nsName)
+        ? searchMaterialFunKey.value
+        : searchMaterialVarKey.value)
+        ? 'open'
+        : ''
       html += `<li>
-          <details>
+          <details ${isOpen}>
             <summary>${item.name}</summary>
             <ul>${generateMaterialTree(item.children, nsName, isFunTree, showField)}</ul>
           </details>
@@ -303,7 +313,9 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="`iw-editor text-base text-base-content bg-base-100 border border-solid border-base-300 rounded-md grid ${openDebugPanel ? 'grid-cols-12' : ''}`">
+  <div
+    :class="`iw-editor text-base text-base-content bg-base-100 border border-solid border-base-300 rounded-md grid ${openDebugPanel ? 'grid-cols-12' : ''}`"
+  >
     <div :class="`${openDebugPanel ? 'col-span-8' : ''}`">
       <div class="bg-base-200 p-1 border-solid border-b border-b-base-300 flex justify-between">
         <div>
@@ -311,14 +323,15 @@ defineExpose({
         </div>
         <div class="iw-editor-toolbar__opt">
           <button class="iw-btn iw-btn-ghost iw-btn-xs" @click="openDebugPanel = !openDebugPanel">
-            <i :class="iconSvg.DEBUG" />  {{ $t('editor.debug') }}
+            <i :class="iconSvg.DEBUG" /> {{ $t('editor.debug') }}
           </button>
         </div>
       </div>
       <div class="iw-editor-formula">
         <CmWrapComp
           ref="CmWrapCompRef" class="w-full min-h-[200px]" :formula-value="props.formulaValue"
-          :target-guard="targetVar" :materials="materials" :entrance="entrance" @update-formula-result="watchFormulaResult"
+          :target-guard="targetVar" :materials="materials" :entrance="entrance"
+          @update-formula-result="watchFormulaResult"
         />
       </div>
       <div class="iw-editor-material border-solid border-t border-t-base-300 grid grid-cols-12">
@@ -348,7 +361,7 @@ defineExpose({
             >
             <div class="border-solid border-t border-t-base-300 w-full h-[300px] overflow-auto">
               <ul class="iw-menu iw-menu-sm">
-                <li v-for="materialFun in materialFuns" :key="materialFun.nsName">
+                <li v-for="materialFun of materialFuns" :key="materialFun.nsName">
                   <details open>
                     <summary>{{ materialFun.nsLabel }}</summary>
                     <ul v-html="generateMaterialTree(materialFun.items, materialFun.nsName, true, materialFun.showField)" />
@@ -371,10 +384,7 @@ defineExpose({
         </div>
       </div>
     </div>
-    <div
-      v-show="openDebugPanel"
-      :class="`iw-editor-debug ${openDebugPanel ? 'col-span-4' : ''}`"
-    >
+    <div v-show="openDebugPanel" :class="`iw-editor-debug ${openDebugPanel ? 'col-span-4' : ''}`">
       <DebugComp
         ref="DebugCompRef" v-model:materials="filterUsedMaterials" v-model:formula-value="formulaResult.value"
         v-model:pass="formulaResult.pass" :entrance="props.entrance"
@@ -384,7 +394,7 @@ defineExpose({
 </template>
 
 <style lang="css">
-.iw-editor-material__item{
+.iw-editor-material__item {
   @apply flex flex-col items-start;
 }
 

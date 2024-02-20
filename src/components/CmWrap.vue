@@ -261,10 +261,12 @@ const iwEditorLinter = linter((view) => {
     // For example: $.fun.upper(()
     // Errors in syntax tree parsing may accidentally trigger formula parameter number check errors
     const verifiedNode: [number, number][] = []
+    const output = []
     formulaResult.materials = []
     syntaxTree(view.state)
       .topNode.cursor()
       .iterate((node: any) => {
+        output.push(node.name)
         diagnosticFormula(
           node.node,
           view.state,
